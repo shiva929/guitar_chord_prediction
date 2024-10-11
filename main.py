@@ -6,8 +6,9 @@ import seaborn as sns
 import os
 import streamlit as st
 import warnings
-warnings.filterwarnings('ignore')
 import pickle
+
+warnings.filterwarnings('ignore')
 
 st.markdown(
     """
@@ -18,9 +19,7 @@ st.markdown(
 )
 
 # Add logo
-st.logo('as12.png',size='large')  
-
-
+st.image('as12.png', width=150)  # Updated to use st.image for displaying logo
 
 st.title('Guitar Chord Recognition')
 
@@ -41,13 +40,13 @@ def predict_chords(audio_file, model, label_encoder, segment_length=0.5):
         segment = y[start_frame:end_frame]
 
         chroma = librosa.feature.chroma_stft(y=segment, sr=sr)
-        features = np.mean(chroma, axis=1).reshape(1,-1)
+        features = np.mean(chroma, axis=1).reshape(1, -1)
         
         probas = model.predict_proba(features)[0]
         
         best_idx = np.argmax(probas)
         best_chord = label_encoder.inverse_transform([best_idx])[0]
-        chords_pred.append(best_chord)
+        chords_pred.append(str(best_chord)) 
     
     return chords_pred
 
@@ -61,6 +60,6 @@ audio_file = st.file_uploader('Please upload an audio file (.wav)')
 
 if audio_file is not None:
     st.audio(audio_file)
-    predicted_chords = predict_chords(audio_file, model, label_encoder, segment_length=0.5)
     if st.button('Predict Chords'):
+        predicted_chords = predict_chords(audio_file, model, label_encoder, segment_length=0.5)
         st.write(f'Predicted chords: {predicted_chords}')
