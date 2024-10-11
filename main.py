@@ -9,7 +9,6 @@ import warnings
 warnings.filterwarnings('ignore')
 import pickle
 
-# Add an important announcement tab with no background and red text
 st.markdown(
     """
     <div style="padding:10px;text-align:center;">
@@ -19,9 +18,8 @@ st.markdown(
 )
 
 # Add logo
-st.logo('as12.png',size='large')  # Replace with the path to your logo
+st.logo('as12.png',size='large')  
 
-# Add some space
 
 
 st.title('Guitar Chord Recognition')
@@ -37,34 +35,28 @@ def predict_chords(audio_file, model, label_encoder, segment_length=0.5):
     for start in np.arange(0, duration, segment_length):
         end = min(start + segment_length, duration)
         
-        # Convert start and end times to frame indices
         start_frame = int(start * sr)
         end_frame = int(end * sr)
         
         segment = y[start_frame:end_frame]
 
-        # Extract features
         chroma = librosa.feature.chroma_stft(y=segment, sr=sr)
         features = np.mean(chroma, axis=1).reshape(1,-1)
         
-        # Get prediction probabilities
         probas = model.predict_proba(features)[0]
         
-        # Get all chords with probability above the threshold
         best_idx = np.argmax(probas)
         best_chord = label_encoder.inverse_transform([best_idx])[0]
         chords_pred.append(best_chord)
     
     return chords_pred
 
-# Load the model and label encoder
 with open('chord_svm_model.pkl', 'rb') as f:
     model = pickle.load(f)
 
 with open('label_encoder.pkl', 'rb') as f:
     label_encoder = pickle.load(f)
 
-# Audio file uploader
 audio_file = st.file_uploader('Please upload an audio file (.wav)')
 
 if audio_file is not None:
