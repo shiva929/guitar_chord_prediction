@@ -6,7 +6,7 @@ streamlit==1.39.0
 librosa==0.10.2.post1
 llvmlite==0.39.1
 numba==0.55.1
-distutils 
+setuptools>=61.0.0  
 
         
 
