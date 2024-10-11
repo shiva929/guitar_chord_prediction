@@ -19,7 +19,7 @@ st.markdown(
 )
 
 # Add logo
-st.logo('as12.png', width=150)  # Updated to use st.image for displaying logo
+st.logo('as12.png',size='large')  
 
 st.title('Guitar Chord Recognition')
 
