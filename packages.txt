@@ -1,1 +1,2 @@
-llvm 
+llvmlite==0.41.1
+
