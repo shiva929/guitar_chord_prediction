@@ -96,11 +96,13 @@ if audio_file is not None:
         st.error('Please upload a valid WAV or MP3 file.')
     else:
         st.audio(audio_file)
+
+    threshold = st.slider('Select probability threshold', 0.0, 1.0, 0.3)
         
 
 
         if st.button('Predict Chords'):
             with st.spinner('Processing...'):
-                predicted_chords = predict_chords(audio_file, model, label_encoder, sr=22050, threshold=0.1)
+                predicted_chords = predict_chords(audio_file, model, label_encoder, sr=22050, threshold=threshold)
                 st.write(f'Predicted chords: {predicted_chords}')
                 display_chord_plot(predicted_chords)  # Visualize the predicted chords
