@@ -10,6 +10,7 @@ import pickle
 
 warnings.filterwarnings('ignore')
 
+# Set the title and logo
 st.markdown(
     """
     <div style="padding:10px;text-align:center;">
@@ -25,17 +26,27 @@ st.title('Guitar Chord Recognition')
 
 st.markdown("<br><br>", unsafe_allow_html=True)
 
+def load_model():
+    with open('chord_svm_model.pkl', 'rb') as f:
+        model = pickle.load(f)
+    with open('label_encoder.pkl', 'rb') as f:
+        label_encoder = pickle.load(f)
+    return model, label_encoder
+
 def predict_chords(audio_file, model, label_encoder, sr=22050, threshold=0.3):
     y, sr = librosa.load(audio_file, sr=sr)
     
+    # Detect tempo and beat frames
     tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr)
     
     beat_times = librosa.frames_to_time(beat_frames, sr=sr)
     
-    st.write(f"Detected BPM: {tempo[0]:.2f}")
+    # Display detected BPM
+    st.metric(label="Detected BPM", value=f"{tempo:.2f}")
     
     chords_pred = []
     
+    # Iterate through beat frames to predict chords
     for i in range(len(beat_times) - 1):
         start = beat_times[i]
         end = beat_times[i + 1]
@@ -63,16 +74,34 @@ def predict_chords(audio_file, model, label_encoder, sr=22050, threshold=0.3):
     
     return chords_pred
 
-with open('chord_svm_model.pkl', 'rb') as f:
-    model = pickle.load(f)
+def display_chord_plot(chords):
+    # Visualize the frequency of predicted chords
+    chord_counts = pd.Series(chords).value_counts()
+    plt.figure(figsize=(10, 5))
+    sns.barplot(x=chord_counts.index, y=chord_counts.values)
+    plt.title("Chords Frequency")
+    plt.xlabel("Chords")
+    plt.ylabel("Frequency")
+    st.pyplot(plt)
 
-with open('label_encoder.pkl', 'rb') as f:
-    label_encoder = pickle.load(f)
+# Load the model and label encoder
+model, label_encoder = load_model()
 
-audio_file = st.file_uploader('Please upload an audio file (.wav)')
+# File uploader for audio file
+audio_file = st.file_uploader('Please upload an audio file (.wav or .mp3)', type=['wav', 'mp3'])
 
 if audio_file is not None:
-    st.audio(audio_file)
-    if st.button('Predict Chords'):
-        predicted_chords = predict_chords(audio_file, model, label_encoder, sr=22050, threshold=0.1)
-        st.write(f'Predicted chords: {predicted_chords}')
+    # Check if the file type is correct
+    if audio_file.type not in ['audio/wav', 'audio/mpeg']:
+        st.error('Please upload a valid WAV or MP3 file.')
+    else:
+        st.audio(audio_file)
+        
+        # Add a threshold slider
+        threshold = st.slider('Select probability threshold', 0.0, 1.0, 0.3)
+
+        if st.button('Predict Chords'):
+            with st.spinner('Processing...'):
+                predicted_chords = predict_chords(audio_file, model, label_encoder, sr=22050, threshold=threshold)
+                st.write(f'Predicted chords: {predicted_chords}')
+                display_chord_plot(predicted_chords)  # Visualize the predicted chords
