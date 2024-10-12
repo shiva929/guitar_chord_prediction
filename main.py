@@ -61,14 +61,12 @@ def predict_chords(audio_file, model, label_encoder, sr=22050, threshold=0.3):
         
         probas = model.predict_proba(features)[0]
         
-        chord_list = []
         for idx, proba in enumerate(probas):
             if proba > threshold:
                 chord = label_encoder.inverse_transform([idx])[0]
-                chord_list.append(str(chord))
+                chords_pred.append(str(chord))
         
         # Append the first chord found or "Rest" if none
-        chords_pred.append(str(chord_list))
     
     return chords_pred
 
