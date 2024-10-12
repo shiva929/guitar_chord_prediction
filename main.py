@@ -101,6 +101,6 @@ if audio_file is not None:
 
         if st.button('Predict Chords'):
             with st.spinner('Processing...'):
-                predicted_chords = predict_chords(audio_file, model, label_encoder, sr=22050, threshold=threshold)
+                predicted_chords = predict_chords(audio_file, model, label_encoder, sr=22050, threshold=0.1)
                 st.write(f'Predicted chords: {predicted_chords}')
                 display_chord_plot(predicted_chords)  # Visualize the predicted chords
