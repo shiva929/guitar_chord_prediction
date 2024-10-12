@@ -33,7 +33,7 @@ def load_model():
         label_encoder = pickle.load(f)
     return model, label_encoder
 
-def predict_chords(audio_file, model, label_encoder, sr=22050, threshold=0.3):
+def predict_chords(audio_file, model, label_encoder, sr=22050, threshold=0.1):
     y, sr = librosa.load(audio_file, sr=sr)
     
     # Detect tempo and beat frames
@@ -42,7 +42,7 @@ def predict_chords(audio_file, model, label_encoder, sr=22050, threshold=0.3):
     beat_times = librosa.frames_to_time(beat_frames, sr=sr)
     
     # Display detected BPM
-    st.metric(label="Detected BPM", value=f"{tempo:.2f}")
+    st.metric(label="Detected BPM", value=f"{tempo[0]:.2f}")
     
     chords_pred = []
     
@@ -97,8 +97,7 @@ if audio_file is not None:
     else:
         st.audio(audio_file)
         
-        # Add a threshold slider
-        threshold = st.slider('Select probability threshold', 0.0, 1.0, 0.3)
+
 
         if st.button('Predict Chords'):
             with st.spinner('Processing...'):
