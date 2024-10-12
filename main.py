@@ -95,9 +95,9 @@ if audio_file is not None:
         
         # Add a threshold slider
         threshold = st.slider('Select probability threshold', 0.0, 1.0, 0.3)
+if st.button('Predict Chords'):
+    with st.spinner('Processing...'):
+        predicted_chords = predict_chords(audio_file, model, label_encoder, sr=22050, threshold=threshold)
+        st.write(f'Predicted chords: {", ".join(predicted_chords)}')  # Updated line
+        display_chord_plot(predicted_chords)  # Visualize the predicted chords 
 
-        if st.button('Predict Chords'):
-            with st.spinner('Processing...'):
-                predicted_chords = predict_chords(audio_file, model, label_encoder, sr=22050, threshold=threshold)
-                st.write(f'Predicted chords: {predicted_chords}')
-                display_chord_plot(predicted_chords)  # Visualize the predicted chords
