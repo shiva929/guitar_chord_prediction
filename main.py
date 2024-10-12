@@ -42,7 +42,7 @@ def predict_chords(audio_file, model, label_encoder, sr=22050, threshold=0.3):
     beat_times = librosa.frames_to_time(beat_frames, sr=sr)
     
     # Display detected BPM
-    st.metric(label="Detected BPM", value=f"{tempo:.2f}")
+    st.metric(label="Detected BPM", value=f"{tempo[0]:.2f}")
     
     chords_pred = []
     
