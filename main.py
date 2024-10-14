@@ -74,7 +74,6 @@ def predict_chords(audio_file, model, label_encoder, sr=22050):
         
         # Append the first chord found or "Rest" if none
     
-    return chords_pred
 
 def display_chord_plot(chords):
     # Visualize the frequency of predicted chords
