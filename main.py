@@ -33,7 +33,7 @@ def load_model():
         label_encoder = pickle.load(f)
     return model, label_encoder
 
-def predict_chords(audio_file, model, label_encoder, sr=22050, threshold=0.3):
+def predict_chords(audio_file, model, label_encoder, sr=22050):
     y, sr = librosa.load(audio_file, sr=sr)
     
     # Detect tempo and beat frames
@@ -51,20 +51,26 @@ def predict_chords(audio_file, model, label_encoder, sr=22050, threshold=0.3):
         start = beat_times[i]
         end = beat_times[i + 1]
         
+        # Convert start and end times to frame indices
         start_frame = int(start * sr)
         end_frame = int(end * sr)
         
         segment = y[start_frame:end_frame]
 
+        # Extract features
         chroma = librosa.feature.chroma_stft(y=segment, sr=sr)
         features = np.mean(chroma, axis=1).reshape(1, -1)
         
+        # Get prediction probabilities
         probas = model.predict_proba(features)[0]
         
-        for idx, proba in enumerate(probas):
-            if proba > threshold:
-                chord = label_encoder.inverse_transform([idx])[0]
-                chords_pred.append(str(chord))
+        # Get the predicted chord based on the highest probability
+        predicted_class = np.argmax(probas)
+        chord = label_encoder.inverse_transform([predicted_class])[0]
+        
+        chords_pred.append(str(chord))
+    
+    return chords_pred
         
         # Append the first chord found or "Rest" if none
     
@@ -93,8 +99,6 @@ if audio_file is not None:
     else:
         st.audio(audio_file)
         
-        # Add a threshold slider
-        threshold = st.slider('Select probability threshold', 0.0, 1.0, 0.3)
 if st.button('Predict Chords'):
     with st.spinner('Processing...'):
         predicted_chords = predict_chords(audio_file, model, label_encoder, sr=22050, threshold=threshold)
