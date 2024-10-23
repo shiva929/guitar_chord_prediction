@@ -89,7 +89,7 @@ def display_chord_plot(chords):
 model, label_encoder = load_model()
 
 # File uploader for audio file
-audio_file = st.file_uploader('Please upload an audio file (.wav or .mp3)', type=['wav', 'mp3'])
+audio_file = st.file_uploader('Please upload an audio file (.wav or .mp3)')
 
 if audio_file is not None:
     # Check if the file type is correct
