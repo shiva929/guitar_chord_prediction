@@ -10,22 +10,13 @@ import pickle
 
 warnings.filterwarnings('ignore')
 
-# Set the title and logo
-st.markdown(
-    """
-    <div style="padding:10px;text-align:center;">
-        <marquee style="color:red;font-weight:bold;font-size:20px;">⚠️ Important Announcement: Beta Version - This is not the final product! The website name is not final and is Subject to Change ⚠️</marquee>
-    </div>
-    """, unsafe_allow_html=True
-)
-
 # Add logo
-st.logo('as12.png', size='large')  
+st.image('as12.png', width=200)  # Update to use st.image for displaying the logo
 
 st.title('Guitar Chord Recognition')
 
-st.markdown("<br><br>", unsafe_allow_html=True)
 
+# Function to load the model and label encoder
 def load_model():
     with open('chord_svm_model.pkl', 'rb') as f:
         model = pickle.load(f)
@@ -33,6 +24,7 @@ def load_model():
         label_encoder = pickle.load(f)
     return model, label_encoder
 
+# Function to predict chords from the audio file
 def predict_chords(audio_file, model, label_encoder, sr=22050):
     y, sr = librosa.load(audio_file, sr=sr)
     
@@ -70,19 +62,24 @@ def predict_chords(audio_file, model, label_encoder, sr=22050):
         
         chords_pred.append(str(chord))
     
-    return chords_pred
-        
-        # Append the first chord found or "Rest" if none
-    
+    return y, sr, beat_times, chords_pred, tempo
 
-def display_chord_plot(chords):
-    # Visualize the frequency of predicted chords
-    chord_counts = pd.Series(chords).value_counts()
-    plt.figure(figsize=(10, 5))
-    sns.barplot(x=chord_counts.index, y=chord_counts.values)
-    plt.title("Chords Frequency")
-    plt.xlabel("Chords")
-    plt.ylabel("Frequency")
+# Function to display the waveform with detected beats and predicted chords
+def display_chord_waveform(y, sr, beat_times, chords_pred, tempo):
+    plt.figure(figsize=(14, 5))
+    librosa.display.waveshow(y, sr=sr, alpha=0.6)
+    plt.vlines(beat_times, -1, 1, color='r', linestyle='--', label='Beats')
+
+    # Annotate the chords on the graph
+    for i in range(len(beat_times) - 1):
+        plt.text(beat_times[i] + 0.02, 0.5, chords_pred[i], 
+                 horizontalalignment='left', fontsize=10, color='blue')
+    
+    plt.title(f'Waveform with Detected Beats and Predicted Chords (Tempo: {tempo[0]:.2f} BPM)')
+    plt.xlabel('Time (s)')
+    plt.ylabel('Amplitude')
+    plt.legend()
+    plt.ylim([-1, 1])  # Set y-limits for better visibility
     st.pyplot(plt)
 
 # Load the model and label encoder
@@ -98,9 +95,8 @@ if audio_file is not None:
     else:
         st.audio(audio_file)
         
-if st.button('Predict Chords'):
-    with st.spinner('Processing...'):
-        predicted_chords = predict_chords(audio_file, model, label_encoder, sr=22050)
-        st.write(f'Predicted chords: {", ".join(predicted_chords)}')  # Updated line
-        display_chord_plot(predicted_chords)  # Visualize the predicted chords 
-
+        if st.button('Predict Chords'):
+            with st.spinner('Processing...'):
+                y, sr, beat_times, predicted_chords, tempo = predict_chords(audio_file, model, label_encoder, sr=22050)
+                st.write(f'Predicted chords: {", ".join(predicted_chords)}')
+                display_chord_waveform(y, sr, beat_times, predicted_chords, tempo)
