@@ -39,7 +39,7 @@ def predict_chords(audio_file, model, label_encoder, sr=22050):
     chords_pred = []
     
     # Iterate through beat frames to predict chords
-    for i in range(len(beat_times)):
+    for i in range(len(beat_times)-1):
         start = beat_times[i]
         end = beat_times[i + 1]
         
