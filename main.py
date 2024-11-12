@@ -31,7 +31,7 @@ def predict_chords(audio_file, model, label_encoder, sr=22050):
     # Detect tempo and beat frames
     tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr)
     
-    beat_times = 88#librosa.frames_to_time(beat_frames, sr=sr)
+    beat_times = librosa.frames_to_time(beat_frames, sr=sr)
     
     # Display detected BPM
     st.metric(label="Detected BPM", value=f"{tempo[0]:.2f}")
